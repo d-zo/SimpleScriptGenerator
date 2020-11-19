@@ -24,6 +24,12 @@ A part of this document describes the usage of SimpleScriptGenerator with the ab
 template (see [abapys_front template](#abapys_front-template)).
 
 
+Project status
+--------------
+
+The source files are to be uploaded until 2020-12-01.
+
+
 Installation and running the program
 ------------------------------------
 
