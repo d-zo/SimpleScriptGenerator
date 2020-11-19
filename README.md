@@ -191,7 +191,7 @@ Still, there are some issues with the current template, especially for new users
 When starting with the abapys_front template,
 it is recommended to export a project with the default settings,
 run it in Abaqus and try to understand the Python script.
-There are some additional comments in the script file (\_ie in the `codeblock.txt` file which
+There are some additional comments in the script file (i.e. in the `codeblock.txt` file which
 will be assembled into a script file) which might be helpful.
 Afterwards, the default settings in the project can be changed (not all at once),
 the project can be exported as another Python script and run in Abaqus/compared to the other script.
