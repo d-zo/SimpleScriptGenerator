@@ -4,7 +4,7 @@ SimpleScriptGenerator 0.3.0
 
 [SimpleScriptGenerator](https://github.com/d-zo/SimpleScriptGenerator)
 is a graphical frontend for interactive script creation.
-It is written in Python and uses three modifiable configuration files (which constitute a template)
+It uses three modifiable configuration files (which constitute a template)
 to produce a script file (see [Structure and configuration](#structure-and-configuration)).
 The program is written in Python and needs a working Python 3.x environment.
 

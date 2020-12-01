@@ -1,0 +1,1282 @@
+# -*- coding: utf-8 -*-
+
+"""
+codeblock.py   v0.4
+2020-10 Dominik Zobel
+"""
+
+# Diese Datei ist nicht zum Ausfuehren gedacht
+import sys
+sys.exit();
+
+
+# Block 000000: Dateikopf
+# Blockcheck [modellerstellung or ausgabeverarbeitung]
+# -*- coding: utf-8 -*-
+
+"""
+Erstellt mit abapys_front
+"""
+# End Block 000000
+
+
+# Block 100010: Definitionsblock Modell erstellen
+# Blockcheck [modellerstellung]
+from part import *
+from material import *
+from section import *
+from assembly import *
+from step import *
+from interaction import *
+from load import *
+from mesh import *
+from optimization import *
+from job import *
+from sketch import *
+from visualization import *
+from connectorBehavior import *
+
+startZeit = time.time();
+
+abapys_dir = __abapys_pfad__;
+sys.path.insert(0, abapys_dir);
+from abapys import *
+
+InitialisiereAbapys(session=session, version=version, pfad=abapys_dir);
+# End Block 100010
+
+
+# Block 200010: Definitionsblock Ausgabe bearbeiten
+# Blockcheck [ausgabeverarbeitung]
+from odbAccess import *
+from odbMaterial import *
+from odbSection import *
+from abaqusConstants import *
+from visualization import *
+import displayGroupOdbToolset as myodbtoolset
+
+abapys_dir = __abapys_pfad__;
+sys.path.insert(0, abapys_dir);
+from abapys import *
+
+InitialisiereAbapys(session=session, version=version);
+# End Block 200010
+
+
+# Block 100100: Zustandsuebertragung
+# Blockcheck [modellerstellung, zustandsuebertragung]
+# Fuer Zustandsuebertragung
+odbname = __modell_uebertragung_datei__;
+
+modellinstname = 'instBoden';
+odbinstname = __modell_uebertragung_odbinstname__;
+
+variablenliste = __modell_uebertragung_variablenliste__;
+# End Block 100100
+
+
+# Block 100120: Zustandszuweisung
+# Blockcheck [modellerstellung, zustandszuweisung]
+# Fuer Zustandszuweisung
+csv_zuweisung = __modell_zuweisung_datei__;
+csv_koordinaten = __modell_zuweisung_koordinaten__;
+
+modellinstname = 'instBoden';
+variablentyp = ['SDV'];
+# End Block 100120
+
+
+# Block 100200: Geometrien
+# Blockcheck [modellerstellung]
+
+
+# --------------
+# - Geometrien -
+# --------------
+# End Block 100200
+
+
+# Block 100220: Geometrien Boden
+# Blockcheck [modellerstellung]
+bodentiefe,   voidhoehe,   gitter_vertikal = [
+#>0           >0          >0
+#[m]          [m]         [m]
+#-----------|-----------|------------------|
+ __modell_boden_tiefe__, __modell_boden_voidhoehe__, __modell_boden_gittervertikal__
+#-----------|-----------|------------------|
+];
+
+bodenbereich,                          gittergroessen = [
+#[radius] oder [laenge/2, breite/2]    [konstant] oder [gross, klein]
+#[m] (aussen->innen)                   [m] (aussen->innen)
+#-----------------------------------------------------------------------------------------------------------------|
+ __modell_boden_horizontalbereiche__,
+ __modell_boden_gitterhorizontal__,
+#-----------------------------------------------------------------------------------------------------------------|
+];
+
+schichten,  schichtmaterial,  restmaterial = [
+#>[0]       >['']             >''
+#[m]
+#-----------------------------------------------------------------------------------------------------------------|
+ __modell_boden_schichttiefen__,
+ __modell_boden_schichtmaterialien__,
+ __modell_boden_restmaterial__
+#-----------------------------------------------------------------------------------------------------------------|
+];
+# End Block 100220
+
+
+# Block 100300: Geometrie Struktur
+# Blockcheck [modellerstellung, mitstruktur, block]
+profil_bezeichnung,    profillaenge,  profilbreite,  profilhoehe,   profilgitter = [
+#>''                   >0             >0             >0             >0
+#                      [m]            [m]            [m]            [m]
+#--------------------|--------------|--------------|--------------|--------------|
+ __modell_strukturname__, __modell_block_laenge__, __modell_block_breite__, __modell_block_hoehe__, __modell_struktur_gitter__
+#--------------------|--------------|--------------|--------------|--------------|
+];
+# End Block 100300
+
+
+# Block 100320: Geometrie Verdraengungsprofil
+# Blockcheck [modellerstellung, mitstruktur, vbp or sobp or vvbp]
+profil_bezeichnung,    profillaenge,  profilradius,  profilspitzenwinkel,  profilspitzenrundwinkel,  profilgitter = [
+#>''                   >0             >0             0-90                  0-90                      >0
+#                      [m]            [m]            [Grad]                [Grad]                    [m]
+#--------------------|--------------|--------------|---------------------|-------------------------|--------------|
+ __modell_strukturname__, __modell_pfahl_laenge__, __modell_pfahl_radius__, __modell_pfahl_spitzenwinkel__, __modell_pfahl_spitzenrundwinkel__, __modell_struktur_gitter__
+#--------------------|--------------|--------------|---------------------|-------------------------|--------------|
+];
+# End Block 100320
+
+
+# Block 100340: Zusaetzliche Geometrie Schneckenprofil
+# Blockcheck [modellerstellung, mitstruktur, sobp]
+schraublaenge,  seelenradius,  ganghoehe,  wendeldicke = [
+#>0             >0             >0          >0
+#[m]            [m]            [m]         [m]
+#-------------|--------------|-----------|-------------|
+ __modell_sobp_schraublaenge__, __modell_sobp_radius_seele__, __modell_sobp_ganghoehe__, __modell_sobp_wendeldicke__
+#-------------|--------------|-----------|-------------|
+];
+# End Block 100340
+
+
+# Block 100360: Zusaetzliche Geometrie Vollverdraengungsbohrprofil
+# Blockcheck [modellerstellung, mitstruktur, vvbp]
+schraublaenge,  seelenradius,  ganghoehe,  wendeldicke,  schraublaenge1,  profillaenge1,  schraublaenge2,  profillaenge2 = [
+#>0             >0             >0          >0            >0               >0              >0               >0
+#[m]            [m]            [m]         [m]           [m]              [m]             [m]              [m]
+#-------------|--------------|-----------|-------------|----------------|---------------|----------------|---------------|
+ __modell_vvbp_schraublaenge__, __modell_vvbp_radius_seele__, __modell_vvbp_ganghoehe__, __modell_vvbp_wendeldicke__, __modell_vvbp_schraublaenge1__, __modell_vvbp_profillaenge1__, __modell_vvbp_schraublaenge2__, __modell_vvbp_profillaenge2__
+#-------------|--------------|-----------|-------------|----------------|---------------|----------------|---------------|
+];
+# End Block 100360
+
+# Block 100380: Geometrie Zylinderringprofil
+# Blockcheck [modellerstellung, mitstruktur, zylinderring]
+profil_bezeichnung,    profillaenge,  profilradius,  profilinnenradius,  profilgitter = [
+#>''                   >0             >0             >0                  >0
+#                      [m]            [m]            [m]                 [m]
+#--------------------|--------------|--------------|-------------------|--------------|
+ __modell_strukturname__, __modell_pfahl_laenge__, __modell_pfahl_radius__, __modell_zylinderring_innenradius__, __modell_struktur_gitter__
+#--------------------|--------------|--------------|-------------------|--------------|
+];
+# End Block 100380
+
+
+# Block 100500: Start Materialien
+# Blockcheck [modellerstellung]
+
+
+# -------------------------------------------------------------------------------------------------
+# Materialien
+# -------------------------------------------------------------------------------------------------
+# End Block 100500
+
+
+# Block 100520: Stahl
+# Blockcheck [modellerstellung, mitstruktur]
+stahl_dichte = 7.87; # [kN/m^3]
+#                   E-Modul   Querdehnz.
+#                   E [kPa]   nu [-]
+#                 |---------|------------|
+stahl_elastisch = [ 210e6,    0.3        ];
+# End Block 100520
+
+
+# Block 100540: Material Bodenschichten
+# Blockcheck [modellerstellung]
+materialien_boden = [
+#Abaqus-Bez.    Datenbankname                 Parameter-Bez.   Saettigung   Lagerungsd.   Stoffgesetz
+#>''            >''                           ''               [0-1]        [0-1]         >''
+#-------------|-----------------------------|----------------|------------|-------------|--------------------------|
+ __materialien_bodenschichten[0]__
+#-------------|-----------------------------|----------------|------------|-------------|--------------------------|
+# Die Lagerungsdichte/Verdichtungsgrad kann bestimmt werden aus
+#   a) Anfangsdichte rho_0:     D = (rho_0 - rho_min)/(rho_max - rho_min)
+#   b) Anfangsporenzahl e_0:    D = (e_max - e_0)/(e_max - e_min) * (e_min + 1)/(e_0 + 1)
+];
+
+geostatische_nullspannung = 0.1; # [kN/m^2]
+# End Block 100540
+
+
+# Block 100800: Simulationsparameter
+# Blockcheck [modellerstellung]
+viertel = __modell_simulation_viertel__;
+
+# Simulationszeiten und -ausgabefrequenz
+secondsperoutput = __modell_simulation_ausgaben_pro_sekunde__; # [s]
+# End Block 100800
+
+
+# Block 100820: Strukturbewegung und Reibung
+# Blockcheck [modellerstellung, mitstruktur]
+kontakt_mit_reibung = __modell_reibung__;
+reibungskoeffizient = __modell_reibungskoeffizient__; # [-]
+
+strukturposition = __modell_struktur_startposition__; # [m]
+strukturgeschwindigkeit = __modell_struktur_geschwindigkeit__; # [m/s]
+strukturrotation = __modell_struktur_rotation__; # [rad/s]
+# End Block 100820
+
+
+# Block 100841: Simulationsparameter (Standard)
+# Blockcheck [modellerstellung, standard]
+schritt_schwerkraft = [
+#timePeriod   Startinkrement   numInkremente   min.Inkrement
+#[s]          [-]           ? -?                  ? -?
+#-----------|-------------|---------------------|-------------------|
+ __modell_schritt1_dauer__, 1e-3,          1e7,                 1e-9               #
+#-----------|-------------|---------------------|-------------------|
+];
+# End Block 100841
+
+
+# Block 100846: Simulationsparameter (Explizit+CEL)
+# Blockcheck [modellerstellung, explizit or cel]
+schritt_schwerkraft = [
+#timePeriod   scaleFactor   linearBulkViscosity   quadBulkViscosity
+#[s]          [-]           ? -?                  ? -?
+#-----------|-------------|---------------------|-------------------|
+ __modell_schritt1_dauer__, 1.0,          0.48,                 1.2               #
+#-----------|-------------|---------------------|-------------------|
+];
+# End Block 100846
+
+
+# Block 100861: Simulationsparameter (Standard)
+# Blockcheck [modellerstellung, schritt2, standard]
+schritt_nachwirken1 = [
+#timePeriod   Startinkrement   numInkremente   min.Inkrement
+#[s]          [-]           ? -?                  ? -?
+#-----------|-------------|---------------------|-------------------|
+ __modell_schritt2_dauer__, 1e-3,          1e7,                 1e-9               #
+#-----------|-------------|---------------------|-------------------|
+];
+# End Block 100861
+
+
+# Block 100866: Simulationsparameter (Explizit+CEL)
+# Blockcheck [modellerstellung, schritt2, explizit or cel]
+schritt_nachwirken1 = [
+#timePeriod   scaleFactor   linearBulkViscosity   quadBulkViscosity
+#[s]          [-]           ? -?                  ? -?
+#-----------|-------------|---------------------|-------------------|
+ __modell_schritt2_dauer__, 1.0,          0.48,                 1.2               #
+#-----------|-------------|---------------------|-------------------|
+];
+# End Block 100866
+
+
+# Block 100871: Simulationsparameter (Standard)
+# Blockcheck [modellerstellung, schritt3, standard]
+schritt_profilaktivierung = [
+#timePeriod   Startinkrement   numInkremente   min.Inkrement
+#[s]          [-]           ? -?                  ? -?
+#-----------|-------------|---------------------|-------------------|
+ __modell_schritt3_dauer__, 1e-3,          1e7,                 1e-9               #
+#-----------|-------------|---------------------|-------------------|
+];
+# End Block 100871
+
+
+# Block 100876: Simulationsparameter (Explizit+CEL)
+# Blockcheck [modellerstellung, schritt3, explizit or cel]
+schritt_profilaktivierung = [
+#timePeriod   scaleFactor   linearBulkViscosity   quadBulkViscosity
+#[s]          [-]           ? -?                  ? -?
+#-----------|-------------|---------------------|-------------------|
+ __modell_schritt3_dauer__, 1.0,          0.48,                 1.2               #
+#-----------|-------------|---------------------|-------------------|
+];
+# End Block 100876
+
+
+# Block 100881: Simulationsparameter (Standard)
+# Blockcheck [modellerstellung, schritt4, standard]
+schritt_nachwirken2 = [
+#timePeriod   Startinkrement   numInkremente   min.Inkrement
+#[s]          [-]           ? -?                  ? -?
+#-----------|-------------|---------------------|-------------------|
+ __modell_schritt4_dauer__, 1e-3,          1e7,                 1e-9               #
+#-----------|-------------|---------------------|-------------------|
+];
+# End Block 100881
+
+
+# Block 100886: Simulationsparameter (Explizit+CEL)
+# Blockcheck [modellerstellung, schritt4, explizit or cel]
+schritt_nachwirken2 = [
+#timePeriod   scaleFactor   linearBulkViscosity   quadBulkViscosity
+#[s]          [-]           ? -?                  ? -?
+#-----------|-------------|---------------------|-------------------|
+ __modell_schritt4_dauer__, 1.0,          0.48,                 1.2               #
+#-----------|-------------|---------------------|-------------------|
+];
+# End Block 100886
+
+
+# Block 100940: Userroutine
+# Blockcheck [modellerstellung]
+# Userroutine
+userroutine = __modell_userroutine__;
+numDepVar = __modell_userroutine_depvar__;
+# End Block 100940
+
+
+# Block 101000: Modelldefinition
+# Blockcheck [modellerstellung]
+
+
+# -------------------------------------------------------------------------------------------------
+# Automatische Bearbeitung
+# -------------------------------------------------------------------------------------------------
+# End Block 101000
+
+
+# Block 101021: Modelldefinition
+# Blockcheck [modellerstellung, standard]
+modelname = __modell_name__ + str(__modell_version__).zfill(2) + 'std';
+# End Block 101021
+
+
+# Block 101022: Modelldefinition
+# Blockcheck [modellerstellung, explizit]
+modelname = __modell_name__ + str(__modell_version__).zfill(2) + 'exp';
+# End Block 101022
+
+
+# Block 101024: Modelldefinition
+# Blockcheck [modellerstellung, cel]
+modelname = __modell_name__ + str(__modell_version__).zfill(2) + 'cel';
+# End Block 101024
+
+
+# Block 101040: Modelldefinition
+# Blockcheck [modellerstellung]
+mdb.Model(name=modelname, modelType=STANDARD_EXPLICIT);
+mymodel = mdb.models[modelname];
+# End Block 101040
+
+
+# Block 101100: Materialdefinitionen
+# Blockcheck [modellerstellung]
+
+# -------------------------------------------------------------------------------------------------
+# Materialdefinitionen
+# -------------------------------------------------------------------------------------------------
+
+if (schichten[-1] == bodentiefe):
+   verwendeteMaterialien = sorted(set(schichtmaterial));
+else:
+   verwendeteMaterialien = sorted(set(schichtmaterial + [restmaterial]));
+#
+# End Block 101100
+
+
+# Block 101123: Materialdefinitionen
+# Blockcheck [modellerstellung, standard or explizit]
+benoetigtUserroutine, verwendeteBodenwerte = BodenmaterialUndSectionErstellen(modell=mymodel,
+   verwendeteMaterialien=verwendeteMaterialien, verfuegbareMaterialien=materialien_boden,
+   userroutine=userroutine, numDepVar=numDepVar, euler=False);
+# End Block 101123
+
+
+# Block 101124: Materialdefinitionen
+# Blockcheck [modellerstellung, cel]
+benoetigtUserroutine, verwendeteBodenwerte = BodenmaterialUndSectionErstellen(modell=mymodel,
+   verwendeteMaterialien=verwendeteMaterialien, verfuegbareMaterialien=materialien_boden,
+   userroutine=userroutine, numDepVar=numDepVar, euler=True);
+# End Block 101124
+
+
+# Block 101140: Materialdefinitionen Stahl
+# Blockcheck [modellerstellung, mitstruktur]
+
+g = 9.81;
+mymodel.Material(name='Stahl');
+mymodel.materials['Stahl'].Density(table=((stahl_dichte, ), ));
+mymodel.materials['Stahl'].Elastic(table=((stahl_elastisch[0], stahl_elastisch[1]), ));
+mymodel.HomogeneousSolidSection(material='Stahl', name='secStahl', thickness=None);
+
+
+# -------------------------------------------------------------------------------------------------
+# Kontaktbedingungen
+# -------------------------------------------------------------------------------------------------
+
+mymodel.ContactProperty('Kontakt');
+mymodel.interactionProperties['Kontakt'].NormalBehavior(allowSeparation=ON,
+   constraintEnforcementMethod=DEFAULT, pressureOverclosure=HARD);
+if (kontakt_mit_reibung):
+   mymodel.interactionProperties['Kontakt'].TangentialBehavior(
+      dependencies=0, directionality=ISOTROPIC, elasticSlipStiffness=None,
+      formulation=PENALTY, fraction=0.005, maximumElasticSlip=FRACTION,
+      pressureDependency=OFF, shearStressLimit=None, slipRateDependency=OFF,
+      table=((reibungskoeffizient, ), ), temperatureDependency=OFF);
+else:
+   mymodel.interactionProperties['Kontakt'].TangentialBehavior(formulation=FRICTIONLESS);
+#
+# End Block 101140
+
+
+# Block 101260: Bauteil Boden
+# Blockcheck [modellerstellung]
+
+# -------------------------------------------------------------------------------------------------
+# Part: Boden
+# -------------------------------------------------------------------------------------------------
+# End Block 101260
+
+
+# Block 101283: Bauteil Boden (Standard+Explizit)
+# Blockcheck [modellerstellung, standard or explizit]
+bodenpunkte = None;
+xypartition = [True, False];
+# End Block 101283
+
+
+# Block 101293: Bauteil Boden (Standard+Explizit)
+# Blockcheck [modellerstellung, mitstruktur, block, standard or explizit]
+if (strukturposition[2] < 0.0):
+   Log('# Warnung: Aussparung fuer Block z.Z. noch nicht unterstuetzt');
+#
+# End Block 101293
+
+
+# Block 101303: Bauteil Boden (Standard+Explizit) # Innenbereich (zylinderring)
+# Blockcheck [modellerstellung, standard or explizit, zylinderring]
+xypartition = [True, True];
+if (strukturposition[2] < 0.0):
+   bodenpunkte = [(0.0, 0.0),
+                  (0.0, bodentiefe),
+                  (profilinnenradius, bodentiefe),
+                  (profilinnenradius, bodentiefe+strukturposition[2]),
+                  (profilradius, bodentiefe+strukturposition[2]),
+                  (profilradius, bodentiefe),
+                  (bodenbereich[0][0], bodentiefe),
+                  (bodenbereich[0][0], 0.0)];
+#
+# End Block 101303
+
+
+# Block 101313: Bauteil Boden (Standard+Explizit) # FIXME: Wendeln (sobp), Verdraengungskoerper (vvbp)
+# Blockcheck [modellerstellung, standard or explizit, vbp or sobp or vvbp]
+xypartition = [True, True];
+if (strukturposition[2] < 0.0):
+   Log('# Warnung: Aussparung fuer gewaehlte Geometrie nur eine zylindrische Annäherung');
+   bodenpunkte = [(0.0, 0.0),
+                  (0.0, bodentiefe+strukturposition[2]),
+                  (profilradius, bodentiefe+strukturposition[2]),
+                  (profilradius, bodentiefe),
+                  (bodenbereich[0][0], bodentiefe),
+                  (bodenbereich[0][0], 0.0)];
+# End Block 101313
+
+
+# Block 101343: Bauteil Boden (Standard+Explizit)
+# Blockcheck [modellerstellung, standard or explizit]
+[partBoden, instBoden] = Boden(modell=mymodel, name='Boden', bodentiefe=bodentiefe,
+   voidhoehe=voidhoehe, bodenbereich=bodenbereich, gittergroessen=gittergroessen,
+   gitter_boden_vertikal=gitter_vertikal, schichten=schichten, schichtmaterial=schichtmaterial,
+   restmaterial=restmaterial, xypartition=xypartition, euer=False, viertel=viertel,
+   rotationsprofilpunkte=bodenpunkte);
+mymodel.rootAssembly.translate(vector=(0.0, 0.0, -bodentiefe), instanceList=(instBoden.name, ));
+# End Block 101343
+
+
+# Block 101344: Bauteil Boden (CEL)
+# Blockcheck [modellerstellung, cel]
+[partBoden, instBoden] = Boden(modell=mymodel, name='Boden', bodentiefe=bodentiefe,
+   voidhoehe=voidhoehe, bodenbereich=bodenbereich, gittergroessen=gittergroessen,
+   gitter_boden_vertikal=gitter_vertikal, schichten=schichten, schichtmaterial=schichtmaterial,
+   restmaterial=restmaterial, xypartition=[True, False], euler=True, viertel=viertel);
+mymodel.rootAssembly.translate(vector=(0.0, 0.0, -bodentiefe), instanceList=(instBoden.name, ));
+assignmentList = [];
+# End Block 101344
+
+
+# Block 101354: Zylinderfoermige Aussparung (CEL)
+# Blockcheck [modellerstellung, mitstruktur, zylinderring, cel]
+# Aussparung kann erst nach der Mesh-Erstellung erzeugt werden
+if (strukturposition[2] < 0.0):
+   elemAussparung = partBoden.elements[0:0];
+   for idx, elem in enumerate(partBoden.elements):
+      nodecheck = 0;
+      for node in elem.connectivity:
+         coords = partBoden.nodes[node].coordinates;
+         # Aussparung fuer Zylinderringprofile
+         radius = sqrt((coords[0]-strukturposition[0])**2 + (coords[1]-strukturposition[1])**2);
+         if ((radius < profilradius + abapys_tol) and (radius > profilinnenradius - abapys_tol) and
+            (coords[2] > strukturposition[2] - abapys_tol)):
+            nodecheck += 1;
+         else:
+            break;
+      #
+      if (nodecheck == 8):
+         elemAussparung += partBoden.elements[idx:idx+1];
+   #
+   if (not (elemAussparung == partBoden.elements[0:0])):
+      partBoden.Set(name='setAussparung', elements=elemAussparung);
+      # Der folgende Eintrag in die Materialzuweisungsliste sollte zwar eigentlich ausreichen,
+      # aber es wird dennoch der manuelle Eingriff in den Keyword-Editor am Ende benoetigt
+      assignmentList += ((instBoden.sets['setAussparung'], (0,) * len(verwendeteMaterialien)),);
+#
+# End Block 101354
+
+
+# Block 101364: Bloeckfoermige Aussparung (CEL)
+# Blockcheck [modellerstellung, mitstruktur, block, cel]
+# Aussparung kann erst nach der Mesh-Erstellung erzeugt werden
+if (strukturposition[2] < 0.0):
+   elemAussparung = partBoden.elements[0:0];
+   for idx, elem in enumerate(partBoden.elements):
+      nodecheck = 0;
+      for node in elem.connectivity:
+         coords = partBoden.nodes[node].coordinates;
+         # Aussparung fuer Quaderprofile
+         pos = [abs(coords[0]-strukturposition[0]), abs(coords[1]-strukturposition[1])];
+         if ((pos[0] < profillaenge/2.0 + abapys_tol) and (pos[1] < profilbreite/2.0 + abapys_tol) and
+             (coords[2] > strukturposition[2] - abapys_tol)):
+            nodecheck += 1;
+         else:
+            break;
+      #
+      if (nodecheck == 8):
+         elemAussparung += partBoden.elements[idx:idx+1];
+   #
+   if (not (elemAussparung == partBoden.elements[0:0])):
+      partBoden.Set(name='setAussparung', elements=elemAussparung);
+      # Der folgende Eintrag in die Materialzuweisungsliste sollte zwar eigentlich ausreichen,
+      # aber es wird dennoch der manuelle Eingriff in den Keyword-Editor am Ende benoetigt
+      assignmentList += ((instBoden.sets['setAussparung'], (0,) * len(verwendeteMaterialien)),);
+#
+# End Block 101364
+
+
+# Block 101383: Zuweisung (Standard+Explizit)
+# Blockcheck [modellerstellung, standard or explizit]
+for materialdaten in materialien_boden:
+   partBoden.SectionAssignment(offset=0.0, offsetField='', offsetType=MIDDLE_SURFACE,
+      region=partBoden.sets['set' + materialdaten[0]], sectionName='sec' + materialdaten[0],
+      thicknessAssignment=FROM_SECTION);
+#
+# End Block 101383
+
+
+# Block 101384: Zuweisung (CEL)
+# Blockcheck [modellerstellung, cel]
+partBoden.SectionAssignment(offset=0.0, offsetField='', offsetType=MIDDLE_SURFACE,
+   region=partBoden.sets['setAll'], sectionName='secEuler', thicknessAssignment=FROM_SECTION);
+# End Block 101384
+
+
+# Block 101400: Bauteil Struktur
+# Blockcheck [modellerstellung, mitstruktur]
+
+# -------------------------------------------------------------------------------------------------
+# Part: __modell_strukturname__
+# -------------------------------------------------------------------------------------------------
+# End Block 101400
+
+
+# Block 101440: Geometrie block
+# Blockcheck [modellerstellung, mitstruktur, drei_d, block]
+[partWerkzeug, instWerkzeug] = Quader(modell=mymodel, name=profil_bezeichnung, laenge=profillaenge,
+   breite=profilbreite, hoehe=profilhoehe, materialtyp=DEFORMABLE_BODY, gittergroesse=profilgitter,
+   rp=True, viertel=viertel);
+# End Block 101440
+
+
+# Block 101460: Geometrie Verdraengungsprofil
+# Blockcheck [modellerstellung, mitstruktur, drei_d, vbp]
+[partWerkzeug, instWerkzeug] = Bohrprofil_VBP(modell=mymodel, name=profil_bezeichnung,
+   laenge=profillaenge, r_aussen=profilradius, spitzenwinkel=profilspitzenwinkel,
+   rundwinkel=profilspitzenrundwinkel, gitter_werkzeug=profilgitter);
+# End Block 101460
+
+
+# Block 101480: Geometrie Schneckenprofil
+# Blockcheck [modellerstellung, mitstruktur, drei_d, sobp]
+[partWerkzeug, instWerkzeug] = Bohrprofil_SOBP(modell=mymodel, name=profil_bezeichnung,
+   laenge=profillaenge, r_aussen=profilradius, r_innen=seelenradius,
+   spitzenwinkel=profilspitzenwinkel, rundwinkel=profilspitzenrundwinkel,
+   schraublaenge=schraublaenge, ganghoehe=ganghoehe, wendeldicke=wendeldicke,
+   gitter_werkzeug=profilgitter);
+# End Block 101480
+
+
+# Block 101500: Geometrie Vollverdraengungsbohrprofil
+# Blockcheck [modellerstellung, mitstruktur, drei_d, vvbp]
+[partWerkzeug, instWerkzeug] = Bohrprofil_VVBP(modell=mymodel, name=profil_bezeichnung,
+   laenge=profillaenge, r_aussen=profilradius, r_innen=seelenradius,
+   spitzenwinkel=profilspitzenwinkel, rundwinkel=profilspitzenrundwinkel,
+   schraublaenge1=schraublaenge1, profillaenge1=profillaenge1, schraublaenge2=schraublaenge2,
+   profillaenge2=profillaenge2, laenge12=schraublaenge-schraublaenge1-schraublaenge2,
+   ganghoehe=ganghoehe, wendeldicke=wendeldicke, gitter_werkzeug=profilgitter);
+# End Block 101500
+
+
+# Block 101520: Geometrie zylinderring
+# Blockcheck [modellerstellung, mitstruktur, drei_d, zylinderring]
+[partWerkzeug, instWerkzeug] = Zylinder(modell=mymodel, name=profil_bezeichnung,
+   radius=profilradius, hoehe=profillaenge, materialtyp=DEFORMABLE_BODY, gittergroesse=profilgitter,
+   rp=True, extrasets=False, r_innen=profilinnenradius, xypartition=[True, True], viertel=viertel);
+# End Block 101520
+
+
+# Block 101560: Zuweisung
+# Blockcheck [modellerstellung, mitstruktur]
+partWerkzeug.SectionAssignment(offset=0.0, offsetField='', offsetType=MIDDLE_SURFACE,
+   region=partWerkzeug.sets['setAll'], sectionName='secStahl', thicknessAssignment=FROM_SECTION);
+# End Block 101560
+
+
+# Block 102000: Assembly
+# Blockcheck [modellerstellung]
+
+# -------------------------------------------------------------------------------------------------
+# Assembly: Positionierung und Kontaktbedingungen
+# -------------------------------------------------------------------------------------------------
+
+mymodel.rootAssembly.regenerate();
+# End Block 102000
+
+
+# Block 102020: Positionierung und Starrkoerperdefinition
+# Blockcheck [modellerstellung, mitstruktur]
+mymodel.rootAssembly.translate(instanceList=('inst' + profil_bezeichnung, ),
+   vector=strukturposition);
+mymodel.RigidBody(name='rigid' + profil_bezeichnung, bodyRegion=instWerkzeug.sets['setAll'],
+   refPointRegion=instWerkzeug.sets['setRP']);
+# End Block 102020
+
+
+# Block 102060: Aussparung (CEL)
+# Blockcheck [modellerstellung, mitstruktur, cel, vbp or sobp or vvbp]
+if ((strukturposition[2] < 0.0) and (not partBoden.sets.has_key('setAussparung'))):
+   # Aussparung fuer beliebige Geometrien anhand der beiden Instanzen in der rootAssembly erzeugen
+   mymodel.rootAssembly.DiscreteFieldByVolumeFraction(name='Aussparung', materialLocation=INSIDE,
+      eulerianInstance=instBoden, referenceInstance=instWerkzeug, accuracy=MEDIUM, description='');
+   elemAussparung = LabelAuswahl(elemente=instBoden.elements,
+      labelliste=mymodel.discreteFields['Aussparung'].data[0].domain);
+   #
+   if (not (elemAussparung == partBoden.elements[0:0])):
+      mymodel.rootAssembly.Set(name='setElemAussparung', elements=elemAussparung);
+      # Der folgende Eintrag in die Materialzuweisungsliste sollte zwar eigentlich ausreichen,
+      # aber es wird dennoch der manuelle Eingriff in den Keyword-Editor am Ende benoetigt
+      assignmentList += ((mymodel.rootAssembly.sets['setElemAussparung'], (0,) * len(verwendeteMaterialien)),);
+#
+# End Block 102060
+
+
+# Block 102080: Anfangsbedingungen
+# Blockcheck [modellerstellung]
+
+# -------------------------------------------------------------------------------------------------
+# Step: Initiale Bedingungen und Anfangsrandbedingungen
+# -------------------------------------------------------------------------------------------------
+# End Block 102080
+
+
+# Block 102103: Randbedingungen Boden (Standard+Explizit)
+# Blockcheck [modellerstellung, standard or explizit]
+mymodel.DisplacementBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+   fieldName='', localCsys=None, name='bcBodenUnterseite', region=instBoden.sets['setUnterseite'],
+   u1=UNSET, u2=UNSET, u3=SET, ur1=UNSET, ur2=UNSET, ur3=UNSET);
+if (instBoden.sets.has_key('setMantelflaeche')):
+   mymodel.DisplacementBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+      fieldName='', localCsys=None, name='bcBodenMantel', region=instBoden.sets['setMantelflaeche'],
+      u1=SET, u2=SET, u3=UNSET, ur1=UNSET, ur2=UNSET, ur3=UNSET);
+#
+if (instBoden.sets.has_key('setXFlaeche')):
+   mymodel.DisplacementBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+      fieldName='', localCsys=None, name='bcBodenWandX', region=instBoden.sets['setXFlaeche'],
+      u1=SET, u2=UNSET, u3=UNSET, ur1=UNSET, ur2=UNSET, ur3=UNSET);
+   mymodel.DisplacementBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+      fieldName='', localCsys=None, name='bcBodenWandY', region=instBoden.sets['setYFlaeche'],
+      u1=UNSET, u2=SET, u3=UNSET, ur1=UNSET, ur2=UNSET, ur3=UNSET);
+#
+# End Block 102103
+
+
+# Block 102104: Randbedingungen Boden (Euler)
+# Blockcheck [modellerstellung, cel]
+mymodel.VelocityBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+   fieldName='', localCsys=None, name='bcBodenUnterseite', region=instBoden.sets['setUnterseite'],
+   v1=UNSET, v2=UNSET, v3=0.0, vr1=UNSET, vr2=UNSET, vr3=UNSET);
+if (instBoden.sets.has_key('setMantelflaeche')):
+   mymodel.VelocityBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+      fieldName='', name='bcBodenMantel', region=instBoden.sets['setMantelflaeche'],
+      localCsys=None, v1=0.0, v2=0.0, v3=UNSET, vr1=UNSET, vr2=UNSET, vr3=UNSET);
+#
+if (instBoden.sets.has_key('setXFlaeche')):
+   mymodel.VelocityBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+      fieldName='', localCsys=None, name='bcBodenWandX', region=instBoden.sets['setXFlaeche'],
+      v1=0.0, v2=UNSET, v3=UNSET, vr1=UNSET, vr2=UNSET, vr3=UNSET);
+   mymodel.VelocityBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+      fieldName='', localCsys=None, name='bcBodenWandY', region=instBoden.sets['setYFlaeche'],
+      v1=UNSET, v2=0.0, v3=UNSET, vr1=UNSET, vr2=UNSET, vr3=UNSET);
+#
+# End Block 102104
+
+
+# Block 102800: Randbedingungen Struktur
+# Blockcheck [modellerstellung, mitstruktur]
+mymodel.VelocityBC(amplitude=UNSET, createStepName='Initial', distributionType=UNIFORM,
+   fieldName='', localCsys=None, name='bcPfahl', region=instWerkzeug.sets['setRP'],
+   v1=0.0, v2=0.0, v3=0.0, vr1=0.0, vr2=0.0, vr3=0.0);
+# End Block 102800
+
+
+# Block 103000: Materialzuweisung CEL
+# Blockcheck [modellerstellung, cel]
+for idxMaterial, tempMaterial in enumerate(verwendeteMaterialien):
+   assignmentList += ((instBoden.sets['set' + tempMaterial], Einheitsvektor(len(verwendeteMaterialien), idxMaterial)), );
+#
+mymodel.MaterialAssignment(assignmentList=assignmentList,
+   instanceList=(instBoden, ), name='Materialzuweisung', useFields=False);
+# End Block 103000
+
+
+# Block 103201: Kontaktbedingungen (Standard)
+# Blockcheck [modellerstellung, standard]
+mymodel.ContactStd(createStepName='Initial', name='Allgemeinkontakt');
+# End Block 103201
+
+
+# Block 103206: Kontaktbedingungen (Explizit+CEL)
+# Blockcheck [modellerstellung, explizit or cel]
+mymodel.ContactExp(createStepName='Initial', name='Allgemeinkontakt');
+# End Block 103206
+
+
+# Block 103220: Interaktionsbedingungen
+# Blockcheck [modellerstellung, mitstruktur]
+mymodel.interactions['Allgemeinkontakt'].includedPairs.setValuesInStep(stepName='Initial',
+   useAllstar=ON);
+mymodel.interactions['Allgemeinkontakt'].contactPropertyAssignments.appendInStep(
+   assignments=((GLOBAL, SELF, 'Kontakt'), ), stepName='Initial');
+# End Block 103220
+
+
+# Block 103240: Bodenspannungen
+# Blockcheck [modellerstellung]
+BodenspannungErstellen(modell=mymodel, bodenname='Boden', nullspannung=geostatische_nullspannung,
+   voidhoehe=voidhoehe, schichten=schichten, bodentiefe=bodentiefe,
+   materialschichten=schichtmaterial+[restmaterial], verwendeteBodenwerte=verwendeteBodenwerte,
+   verwendeteMaterialien=verwendeteMaterialien, verbose=True);
+# End Block 103240
+
+
+# Block 103600: Erster Schritt
+# Blockcheck [modellerstellung]
+
+# -------------------------------------------------------------------------------------------------
+# Step: Schwerkraft
+# -------------------------------------------------------------------------------------------------
+# End Block 103600
+
+
+# Block 103621: Schrittdefinition (Standard)
+# Blockcheck [modellerstellung, standard]
+mymodel.StaticStep(timePeriod=schritt_schwerkraft[0], initialInc=schritt_schwerkraft[1],
+   matrixSolver=DIRECT, matrixStorage=UNSYMMETRIC, maxNumInc=int(schritt_schwerkraft[2]),
+   minInc=schritt_schwerkraft[3], nlgeom=ON, name='Schwerkraft', noStop=OFF,
+   previous='Initial', timeIncrementationMethod=AUTOMATIC);
+# End Block 103621
+
+
+# Block 103626: Schrittdefinition (Explizit+CEL)
+# Blockcheck [modellerstellung, explizit or cel]
+mymodel.ExplicitDynamicsStep(name='Schwerkraft', previous='Initial',
+   linearBulkViscosity=schritt_schwerkraft[2], quadBulkViscosity=schritt_schwerkraft[3],
+   scaleFactor=schritt_schwerkraft[1], timePeriod=schritt_schwerkraft[0]);
+# End Block 103626
+
+
+# Block 103700: Schwerkraft
+# Blockcheck [modellerstellung]
+mymodel.Gravity(comp3=-g, createStepName='Schwerkraft', distributionType=UNIFORM, field='',
+   name='Schwerkraft');
+# End Block 103700
+
+
+# Block 103800: FieldOutputRequest
+# Blockcheck [modellerstellung]
+mymodel.historyOutputRequests.changeKey(fromName='H-Output-1', toName='HOut-Energie');
+mymodel.historyOutputRequests['HOut-Energie'].setValues(timeInterval=secondsperoutput);
+
+del mymodel.fieldOutputRequests['F-Output-1'];
+# End Block 103800
+
+
+# Block 103831: FieldOutputRequests (Standard)
+# Blockcheck [modellerstellung, standard]
+variables = ['ER', 'U', 'S'];
+# End Block 103831
+
+# Block 103832: FieldOutputRequests (Explizit)
+# Blockcheck [modellerstellung, explizit]
+variables = ['ER', 'U', 'A', 'S'];
+# End Block 103832
+
+
+# Block 103834: FieldOutputRequests (CEL)
+# Blockcheck [modellerstellung, cel]
+variables = ['ER', 'U', 'A', 'SVAVG', 'EVF'];
+# End Block 103834
+
+
+# Block 103850: SDV-Variablen mit Userroutine
+# Blockcheck [modellerstellung]
+if (benoetigtUserroutine):
+   variables += ['SDV'];
+else:
+   userroutine = '';
+# End Block 103850
+
+
+# Block 103901: FieldOutputRequest (Standard)
+# Blockcheck [modellerstellung, standard]
+mymodel.FieldOutputRequest(createStepName='Schwerkraft', name='FOut-BodenAll',
+   timeInterval=secondsperoutput, region=instBoden.sets['setAll'], rebar=EXCLUDE,
+   sectionPoints=DEFAULT, variables=tuple(variables), timeMarks=OFF);
+mymodel.FieldOutputRequest(createStepName='Schwerkraft', name='FOut-WerkzeugRP',
+   timeInterval=secondsperoutput, region=instWerkzeug.sets['setRP'], rebar=EXCLUDE,
+   sectionPoints=DEFAULT, variables=('U', 'RF', 'RM'), timeMarks=OFF);
+mymodel.FieldOutputRequest(createStepName='Schwerkraft', name='FOut-WerkzeugAll',
+   timeInterval=secondsperoutput, region=instWerkzeug.sets['setAll'], rebar=EXCLUDE,
+   sectionPoints=DEFAULT, variables=('U',), timeMarks=OFF);
+mymodel.FieldOutputRequest(createStepName='Schwerkraft', name='FOut-Kontakt',
+   timeInterval=secondsperoutput, rebar=EXCLUDE, sectionPoints=DEFAULT,
+   variables=('CSTRESS', 'CFORCE'), timeMarks=OFF);
+# End Block 103901
+
+
+# Block 103906: FieldOutputRequest (Explizit+CEL)
+# Blockcheck [modellerstellung, explizit or cel]
+mymodel.FieldOutputRequest(createStepName='Schwerkraft', name='FOut-BodenAll',
+   timeInterval=secondsperoutput, region=instBoden.sets['setAll'], rebar=EXCLUDE,
+   sectionPoints=DEFAULT, variables=tuple(variables));
+mymodel.FieldOutputRequest(createStepName='Schwerkraft', name='FOut-WerkzeugRP',
+   timeInterval=secondsperoutput, region=instWerkzeug.sets['setRP'], rebar=EXCLUDE,
+   sectionPoints=DEFAULT, variables=('U', 'RF', 'RM'));
+mymodel.FieldOutputRequest(createStepName='Schwerkraft', name='FOut-WerkzeugAll',
+   timeInterval=secondsperoutput, region=instWerkzeug.sets['setAll'], rebar=EXCLUDE,
+   sectionPoints=DEFAULT, variables=('U',));
+mymodel.FieldOutputRequest(createStepName='Schwerkraft', name='FOut-Kontakt',
+   timeInterval=secondsperoutput, rebar=EXCLUDE, sectionPoints=DEFAULT,
+   variables=('CSTRESS', 'CFORCE'));
+# End Block 103906
+
+
+# Block 103931: FieldOutputRequest bei Kontakt (Standard)
+# Blockcheck [modellerstellung, mitstruktur, standard]
+mymodel.HistoryOutputRequest(name='HOut-instWerkzeug', createStepName='Schwerkraft',
+   variables=('RF1', 'RF2', 'RF3', 'RM1', 'RM2', 'RM3'), timeInterval=secondsperoutput,
+   region=instWerkzeug.sets['setRP'], sectionPoints=DEFAULT, rebar=EXCLUDE, timeMarks=OFF);
+# End Block 103931
+
+
+# Block 103936: FieldOutputRequest bei Kontakt (Explizit+CEL)
+# Blockcheck [modellerstellung, mitstruktur, explizit or cel]
+mymodel.HistoryOutputRequest(name='HOut-instWerkzeug', createStepName='Schwerkraft',
+   variables=('RF1', 'RF2', 'RF3', 'RM1', 'RM2', 'RM3'), timeInterval=secondsperoutput,
+   region=instWerkzeug.sets['setRP'], sectionPoints=DEFAULT, rebar=EXCLUDE);
+# End Block 103936
+
+
+# Block 104000: Letzten Schrittnamen speichern
+# Blockcheck [modellerstellung]
+letzterSchritt = 'Schwerkraft';
+# End Block 104000
+
+
+# Block 104800: Zweiter Schritt
+# Blockcheck [modellerstellung, schritt2]
+
+# -------------------------------------------------------------------------------------------------
+# Step: Nachwirken1
+# -------------------------------------------------------------------------------------------------
+# End Block 104800
+
+
+# Block 104821: Schrittdefinition (Standard)
+# Blockcheck [modellerstellung, schritt2, standard]
+mymodel.StaticStep(timePeriod=schritt_nachwirken1[0], initialInc=schritt_nachwirken1[1],
+   matrixSolver=DIRECT, matrixStorage=UNSYMMETRIC, maxNumInc=int(schritt_nachwirken1[2]),
+   minInc=schritt_nachwirken1[3], nlgeom=ON, name='Nachwirken1', noStop=OFF,
+   previous=letzterSchritt, timeIncrementationMethod=AUTOMATIC);
+# End Block 104821
+
+
+# Block 104826: Schrittdefinition (Explizit+CEL)
+# Blockcheck [modellerstellung, schritt2, explizit or cel]
+mymodel.ExplicitDynamicsStep(name='Nachwirken1', previous=letzterSchritt,
+   linearBulkViscosity=schritt_nachwirken1[2], quadBulkViscosity=schritt_nachwirken1[3],
+   scaleFactor=schritt_nachwirken1[1], timePeriod=schritt_nachwirken1[0]);
+# End Block 104826
+
+
+# Block 105000: Letzten Schrittnamen speichern
+# Blockcheck [modellerstellung, schritt2]
+letzterSchritt = 'Nachwirken1';
+# End Block 105000
+
+
+
+# Block 105800: Dritter Schritt
+# Blockcheck [modellerstellung, schritt3]
+
+# -------------------------------------------------------------------------------------------------
+# Step: Aktivierung
+# -------------------------------------------------------------------------------------------------
+# End Block 105800
+
+
+# Block 105821: Schrittdefinition (Standard)
+# Blockcheck [modellerstellung, schritt3, standard]
+mymodel.StaticStep(timePeriod=schritt_profilaktivierung[0], initialInc=schritt_profilaktivierung[1],
+   matrixSolver=DIRECT, matrixStorage=UNSYMMETRIC, maxNumInc=int(schritt_profilaktivierung[2]),
+   minInc=schritt_profilaktivierung[3], nlgeom=ON, name='Aktivierung', noStop=OFF,
+   previous=letzterSchritt, timeIncrementationMethod=AUTOMATIC);
+# End Block 105821
+
+
+# Block 105826: Schrittdefinition (Explizit+CEL)
+# Blockcheck [modellerstellung, schritt3, explizit or cel]
+mymodel.ExplicitDynamicsStep(name='Aktivierung', previous=letzterSchritt,
+   linearBulkViscosity=schritt_profilaktivierung[2], quadBulkViscosity=schritt_profilaktivierung[3],
+   scaleFactor=schritt_profilaktivierung[1], timePeriod=schritt_profilaktivierung[0]);
+# End Block 105826
+
+
+# Block 105880: Strukturgeschwindigkeit
+# Blockcheck [modellerstellung, schritt3, mitstruktur]
+mymodel.boundaryConditions['bcPfahl'].setValuesInStep(stepName='Aktivierung',
+   v1=strukturgeschwindigkeit[0], v2=strukturgeschwindigkeit[1], v3=strukturgeschwindigkeit[2],
+   vr1=strukturrotation[0], vr2=strukturrotation[1], vr3=strukturrotation[2]);
+# End Block 105880
+
+
+# Block 106000: Letzten Schrittnamen speichern
+# Blockcheck [modellerstellung, schritt3]
+letzterSchritt = 'Aktivierung';
+# End Block 106000
+
+
+# Block 106800: Vierter Schritt
+# Blockcheck [modellerstellung, schritt4]
+
+# -------------------------------------------------------------------------------------------------
+# Step: Nachwirken2
+# -------------------------------------------------------------------------------------------------
+# End Block 106800
+
+
+# Block 106821: Schrittdefinition (Standard)
+# Blockcheck [modellerstellung, schritt4, standard]
+mymodel.StaticStep(timePeriod=schritt_nachwirken2[0], initialInc=schritt_nachwirken2[1],
+   matrixSolver=DIRECT, matrixStorage=UNSYMMETRIC, maxNumInc=int(schritt_nachwirken2[2]),
+   minInc=schritt_nachwirken2[3], nlgeom=ON, name='Nachwirken2', noStop=OFF,
+   previous=letzterSchritt, timeIncrementationMethod=AUTOMATIC);
+# End Block 106821
+
+
+# Block 106826: Schrittdefinition (Explizit+CEL)
+# Blockcheck [modellerstellung, schritt4, explizit or cel]
+mymodel.ExplicitDynamicsStep(name='Nachwirken2', previous=letzterSchritt,
+   linearBulkViscosity=schritt_nachwirken2[2], quadBulkViscosity=schritt_nachwirken2[3],
+   scaleFactor=schritt_nachwirken2[1], timePeriod=schritt_nachwirken2[0]);
+# End Block 106826
+
+
+# Block 106880: Strukturgeschwindigkeit
+# Blockcheck [modellerstellung, schritt4, mitstruktur]
+mymodel.boundaryConditions['bcPfahl'].setValuesInStep(stepName='Nachwirken2',
+   v1=0.0, v2=0.0, v3=0.0, vr1=0.0, vr2=0.0, vr3=0.0);
+# End Block 106880
+
+
+# Block 108020: Zustandsuebertragung
+# Blockcheck [modellerstellung, zustandsuebertragung]
+
+# -------------------------------------------------------------------------------------------------
+# Zustandsuebertragung
+# -------------------------------------------------------------------------------------------------
+
+Log('# Zustandsuebertragung');
+
+# Knotentransformation hier durchfuehren
+mdbknoten_neu = mdb.models[modelname].rootAssembly.instances[modellinstname].nodes;
+
+gewichtung = Zustandsuebertragung(session=session, odbname=odbname, odbinstname=odbinstname,
+   variablenliste=variablenliste, modell=mymodel, mdbinstname=modellinstname, step=-1, frame=-1,
+   mdbknoten=mdbknoten_neu);
+# End Block 108020
+
+
+# Block 108060: Zustandszuweisung
+# Blockcheck [modellerstellung, zustandszuweisung]
+
+# -------------------------------------------------------------------------------------------------
+# Zustandszuweisung
+# -------------------------------------------------------------------------------------------------
+
+Log('# Zustandszuweisung');
+
+# Knotentransformation hier durchfuehren
+mdbknoten_neu = mdb.models[modelname].rootAssembly.instances[modellinstname].nodes;
+
+zielkoordinaten, zielelemente, zielwerte = ZielwertquaderEinlesen(dateiname=csv_zuweisung,
+   numKoordinaten=csv_koordinaten, numVar=numDepVar);
+gewichtung = Zustandszuweisung(session=session, modell=mymodel, zielkoordinaten=zielkoordinaten,
+   zielelemente=zielelemente, zielwerte=zielwerte, mdbinstname=modellinstname,
+   mdbknoten=mdbknoten_neu, variablentyp=variablentyp);
+# End Block 108060
+
+
+# Block 108080: Anfangsloesung
+# Blockcheck [modellerstellung, anfangsloesung]
+
+# -------------------------------------------------------------------------------------------------
+# Anfangsloesung
+# -------------------------------------------------------------------------------------------------
+
+KonstanteAnfangsloesungFuerSet(modell=mymodel, instname=__modell_anfangsloesung_instanz__, setname=__modell_anfangsloesung_set__,
+   ausgabewerte=__modell_anfangsloesung_werte__)
+# End Block 108080
+
+
+# Block 109000: Job
+# Blockcheck [modellerstellung]
+
+# -------------------------------------------------------------------------------------------------
+# Job
+# -------------------------------------------------------------------------------------------------
+
+mdb.Job(name=modelname, model=modelname, description='',
+    type=ANALYSIS, atTime=None, waitMinutes=0, waitHours=0, queue=None,
+    memory=90, memoryUnits=PERCENTAGE, explicitPrecision=DOUBLE_PLUS_PACK,
+    nodalOutputPrecision=FULL, echoPrint=OFF, modelPrint=OFF, contactPrint=OFF,
+    historyPrint=OFF, userSubroutine=userroutine, scratch='',
+    resultsFormat=ODB, parallelizationMethodExplicit=DOMAIN, numDomains=1,
+    activateLoadBalancing=False, multiprocessingMode=DEFAULT, numCpus=1);
+myjob = mdb.jobs[modelname];
+# End Block 109000
+
+
+# Block 109023: Schluesselworte mit Kontakt (Standard+Explizit)
+# Blockcheck [modellerstellung, mitstruktur, standard or explizit]
+# Nachbearbeitung im Schluesselworteditor
+# (letzte Operation vor dem Schreiben der Input-Datei)
+mymodel.keywordBlock.synchVersions(storeNodesAndElements=False);
+for idx, text in enumerate(mymodel.keywordBlock.sieBlocks):
+   # Kontakt ohne op=NEW
+   if (text == '*Contact, op=NEW'):
+      mymodel.keywordBlock.replace(idx, '*Contact');
+#
+# End Block 109023
+
+
+# Block 109024: Schluesselworte mit Kontakt (CEL)
+# Blockcheck [modellerstellung, mitstruktur, cel, block or zylinderring]
+# Nachbearbeitung im Schluesselworteditor (letzte Operation vor dem Schreiben der Input-Datei)
+mymodel.keywordBlock.synchVersions(storeNodesAndElements=False);
+for idx, text in enumerate(mymodel.keywordBlock.sieBlocks):
+   # Kontakt ohne op=NEW
+   if (text == '*Contact, op=NEW'):
+      mymodel.keywordBlock.replace(idx, '*Contact');
+   # Falls eine Aussparung vorhanden ist, soll dort kein Material sein
+   if (instBoden.sets.has_key('setAussparung') and (len(text) > 41)):
+      if (text[0:41] == '*Initial Conditions, type=VOLUME FRACTION'):
+         for materialname in verwendeteMaterialien:
+            text = text.replace('instBoden.set' + materialname + ', instBoden.imat' + materialname + ', 1.',
+                                'instBoden.set' + materialname + ', instBoden.imat' + materialname + ', 1.\ninstBoden.setAussparung, instBoden.imat' + materialname + ', 0.');
+         mymodel.keywordBlock.replace(idx, text);
+#
+# End Block 109024
+
+
+# Block 109044: Schluesselworte mit Kontakt (CEL)
+# Blockcheck [modellerstellung, mitstruktur, cel, vbp or sobp or vvbp]
+# Nachbearbeitung im Schluesselworteditor (letzte Operation vor dem Schreiben der Input-Datei)
+mymodel.keywordBlock.synchVersions(storeNodesAndElements=False);
+for idx, text in enumerate(mymodel.keywordBlock.sieBlocks):
+   # Kontakt ohne op=NEW
+   if (text == '*Contact, op=NEW'):
+      mymodel.keywordBlock.replace(idx, '*Contact');
+   # Falls eine Aussparung vorhanden ist, soll dort kein Material sein
+   if (mymodel.rootAssembly.sets.has_key('setElemAussparung') and (len(text) > 41)):
+      if (text[0:41] == '*Initial Conditions, type=VOLUME FRACTION'):
+         for materialname in verwendeteMaterialien:
+            text = text.replace('instBoden.set' + materialname + ', instBoden.imat' + materialname + ', 1.',
+                                'instBoden.set' + materialname + ', instBoden.imat' + materialname + ', 1.\nsetElemAussparung, instBoden.imat' + materialname + ', 0.');
+         mymodel.keywordBlock.replace(idx, text);
+#
+# End Block 109044
+
+
+# Block 109080: Fertigstellung
+# Blockcheck [modellerstellung]
+myjob.writeInput(consistencyChecking=OFF);
+
+# -------------------------------------------------------------------------------------------------
+
+myviewport = session.viewports[session.currentViewportName];
+myviewport.setValues(displayedObject=mymodel.rootAssembly);
+myviewport.view.rotate(xAngle=-90, yAngle=0, zAngle=15, mode=MODEL);
+
+Log('Modellerstellung: %s sec' %(time.time()-startZeit));
+# End Block 109080
+
+
+# Block 200100: odb-Zugriffsvariablen zuweisen
+# Blockcheck [ausgabeverarbeitung]
+odbordner = __odb_ordner__;
+odbdatei = __odb_basisname__;
+odbname = odbordner + odbdatei + '.odb';
+# End Block 200100
+
+
+# Block 200200: odb ggfs. in den Viewport laden und Zugriffsvariable setzen
+# Blockcheck [ausgabeverarbeitung]
+if session.odbData.has_key(odbname):
+   myodb = session.odbs[odbname];
+else:
+   myodb = session.openOdb(name=odbname);
+#
+myviewport = session.viewports[session.currentViewportName];
+myviewport.setValues(displayedObject=myodb, displayMode=SINGLE);
+# End Block 200200
+
+
+# Block 200300: Session verschoenern
+# Blockcheck [ausgabeverarbeitung, viewport_verschoenern]
+ViewportVerschoenern(session=session);
+# End Block 200300
+
+
+# Block 200400: Viewport anpassen
+# Blockcheck [ausgabeverarbeitung]
+ViewportGroesseAendern(viewport=myviewport, bildgroesse=__odb_viewport_groesse__);
+
+viewport_rechts, viewport_oben = __odb_viewport_achse_rechts_oben__;
+Modellansicht(session=session, rechts=viewport_rechts, oben=viewport_oben);
+viewport_drehung = __odb_viewport_drehung__;
+myviewport.view.rotate(xAngle=viewport_drehung[0], yAngle=viewport_drehung[1], zAngle=viewport_drehung[2], mode=MODEL);
+myviewport.view.zoom(zoomFactor=__odb_viewport_zoom__, mode=ABSOLUTE);
+viewport_verschiebung = __odb_viewport_verschiebung__;
+myviewport.view.pan(xFraction=viewport_verschiebung[0], yFraction=viewport_verschiebung[1]);
+# End Block 200400
+
+
+# Block 200480: Viewportdarstellung isometrisch (statt perspektivisch)
+# Blockcheck [ausgabeverarbeitung, viewport_parallel]
+myviewport.view.setProjection(projection=PARALLEL);
+# End Block 200480
+
+
+# Block 200600: Ausgabevariable und Ausgabezeitpunkt
+# Blockcheck [ausgabeverarbeitung]
+myviewport.odbDisplay.display.setValues(plotState=(__odb_ausgabe_darstellung__, ));
+ausgabe_variable, ausgabe_komponente, ausgabe_position = __odb_ausgabevariable__;
+myviewport.odbDisplay.setPrimaryVariable(variableLabel=ausgabe_variable, refinement=(COMPONENT, ausgabe_komponente),
+   outputPosition=ausgabe_position, );
+minwert, maxwert = __odb_ausgabevariable_minmax__;
+myviewport.odbDisplay.contourOptions.setValues(minAutoCompute=__odb_ausgabevariable_auto__, minValue=minwert,
+   maxAutoCompute=__odb_ausgabevariable_auto__, maxValue=maxwert);
+
+step, frame = __odb_referenz_step_frame__;
+stepnames = session.odbData[odbname].steps.keys();
+if (step == -1):
+   step = len(stepnames) - 1;
+#
+framenames = session.odbData[odbname].steps[stepnames[step]].frames.keys();
+if (frame == -1):
+   frame = len(framenames) - 1;
+#
+myviewport.odbDisplay.setFrame(step=step, frame=frame);
+# End Block 200600
+
+
+# Block 200800: Element Sets entfernen
+# Blockcheck [ausgabeverarbeitung, elsetentfernen]
+myviewport.odbDisplay.displayGroup.remove(leaf=myodbtoolset.LeafFromElementSets(elementSets=__odb_ausgabe_elset_entfernen__));
+# End Block 200800
+
+
+# Block 200820: Element Sets hinzufuegen
+# Blockcheck [ausgabeverarbeitung, elsethinzufuegen]
+myviewport.odbDisplay.displayGroup.add(leaf=myodbtoolset.LeafFromElementSets(elementSets=__odb_ausgabe_elset_hinzufuegen__));
+# End Block 200820
+
+
+# Block 200900: ViewCut hinzufuegen
+# Blockcheck [ausgabeverarbeitung, viewcut]
+myviewport.odbDisplay.setValues(viewCutNames=(__odb_ausgabe_viewcut__, ), viewCut=TRUE);
+# End Block 200900
+
+
+# Block 201100: Daten plotten
+# Blockcheck [ausgabeverarbeitung, plot]
+PlotOutput(session=session, odbname=odbname, yvar=__odb_plot_yvar__, yvarposition=__odb_plot_yvarposition__, ylabel=__odb_plot_ylabel__, ylimit=__odb_plot_ylimit__, posydir=__odb_plot_posydir__,
+   xvar=__odb_plot_yvar__, xvarposition=__odb_plot_xvarposition__, xlabel=__odb_plot_xlabel__, xlimit=__odb_plot_xlimit__, posxdir=__odb_plot_posxdir__, titel=__odb_plot_titel__, legendeneintraege=__odb_plot_legendeneintraege__, plothinzufuegen=False);
+# End Block 201100
+
+
+# Block 205100: Gesamten Fieldoutput fuer einen Zeitpunkt speichern
+# Blockcheck [ausgabeverarbeitung, fieldoutzeit]
+fieldoutput = __odb_ausgabevariable__;
+FieldOutputSpeichern(dateiname=__odb_fieldoutput_ausgabedatei__, session=session, odbname=odbname,
+   fieldOutput=fieldoutput[0], step=__odb_referenz_step_frame__, frame=__odb_referenz_step_frame__);
+# End Block 205100
+
+
+# Block 205200: Bestimmten Fieldoutput fuer alle Zeitpunkte speichern
+# Blockcheck [ausgabeverarbeitung, fieldoutort]
+output_elemente = FieldOutputVorbereiten(session=session, odbname=odbname,
+   var=__odb_ausgabevariable__, varposition=__odb_fieldoutput_position__);
+XYDatenSpeichern(dateiname=__odb_fieldoutput_ausgabedatei__, session=session, xydatenname=output_elemente[0].name);
+# End Block 205200
+
+
+# Block 208100: Bild speichern
+# Blockcheck [ausgabeverarbeitung, bildspeichern or plot]
+BildSpeichern(dateiname=__odb_bildname__, session=session);
+# End Block 208100
+
+
+# Block 208140: Multibild speichern
+# Blockcheck [ausgabeverarbeitung, multibildspeichern]
+MultiBildSpeichern(dateiname=__odb_bildname__, session=session, anordnung=__odb_multibild_anordnung__, autozoom=True);
+# End Block 208140
+
+
+# Block 208200: Videobilder speichern
+# Blockcheck [ausgabeverarbeitung, videospeichern]
+VideobilderSpeichern(dateiname=__odb_bildname__, session=session, odbname=odbname);
+# End Block 208200

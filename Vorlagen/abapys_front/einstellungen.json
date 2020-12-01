@@ -1,0 +1,162 @@
+{
+   "allgemein": {
+      "name": "Einstellungsvorlage",
+      "version": 1,
+      "vorlagenversion": 5,
+      "datum": "2020-11-18"
+   },
+   "abapys": {
+      "__abapys_pfad__": "/pfad/zu/abapys"
+   },
+   "aktion": "modellerstellung",
+   "modellerstellung": {
+      "__modell_ordner__": "/pfad/zum/modell/",
+      "__modell_name__": "Pfahl",
+      "__modell_version__": 1,
+      "grundeinstellungen": {
+         "verfahren": "explizit",
+         "drei_d": true
+      },
+      "geometrie": {
+         "boden": {
+            "__modell_boden_tiefe__": 1.5,
+            "__modell_boden_voidhoehe__": 0.5,
+            "__modell_boden_horizontalbereiche__": [[1.5, 0.25], [0.75, 0.25], [0.5, 0.25]],
+            "__modell_boden_gitterhorizontal__": [[1.0, 0.3], [0.3], [0.25]],
+            "__modell_boden_gittervertikal__": 0.25,
+            "__modell_boden_schichttiefen__": [0.25, 1.5],
+            "__modell_boden_schichtmaterialien__": ["Auffuellung", "Sand"],
+            "__modell_boden_restmaterial__": "Sand"
+         },
+         "struktur":{
+            "strukturtyp": "vbp",
+            "__modell_strukturname__": "Pfahl",
+            "__modell_struktur_gitter__": 0.25,
+            "__modell_struktur_startposition__": [0.0, 0.0, 0.0],
+            "__modell_struktur_geschwindigkeit__": [0.0, 0.0, -1.0],
+            "__modell_struktur_rotation__": [0.0, 0.0, 0.0],
+            "__modell_reibung__": true,
+            "__modell_reibungskoeffizient__": 0.22,
+            "block": {
+               "__modell_block_laenge__": 1.0,
+               "__modell_block_breite__": 1.0,
+               "__modell_block_hoehe__": 1.0
+            },
+            "pfahl": {
+               "__modell_pfahl_spitzenwinkel__": 0.0,
+               "__modell_pfahl_spitzenrundwinkel__": 0.0,
+               "__modell_pfahl_laenge__": 4.0,
+               "__modell_pfahl_radius__": 0.4,
+               "vbp": {
+               },
+               "sobp": {
+                  "__modell_sobp_schraublaenge__": 3.5,
+                  "__modell_sobp_radius_seele__": 0.24,
+                  "__modell_sobp_ganghoehe__": 0.6,
+                  "__modell_sobp_wendeldicke__": 0.04
+               },
+               "vvbp": {
+                  "__modell_vvbp_schraublaenge__": 2.4,
+                  "__modell_vvbp_radius_seele__": 0.18,
+                  "__modell_vvbp_ganghoehe__": 0.5,
+                  "__modell_vvbp_wendeldicke__": 0.04,
+                  "__modell_vvbp_schraublaenge1__": 1.25,
+                  "__modell_vvbp_profillaenge1__": 0.6,
+                  "__modell_vvbp_schraublaenge2__": 0.65,
+                  "__modell_vvbp_profillaenge2__": 0.65
+               },
+               "zylinderring": {
+                  "__modell_zylinderring_innenradius__": 0.3
+               }
+            }
+         }
+      },
+      "__materialien_bodenschichten[0]__": [["Auffuellung", "Standardparameter", "", 0.0, 0.5,  "Mohr-Coulomb"],
+                                            ["Sand",        "Hamburger Sand",    "", 0.0, 0.66, "Mohr-Coulomb"]],
+      "userroutine": {
+         "__modell_userroutine__": "user.f",
+         "__modell_userroutine_depvar__": 20
+      },
+      "simulation": {
+         "schrittdauer": {
+            "__modell_schritt1_dauer__": 0.1,
+            "schritt2": false,
+            "__modell_schritt2_dauer__": 0.0,
+            "schritt3": true,
+            "__modell_schritt3_dauer__": 1.0,
+            "schritt4": false,
+            "__modell_schritt4_dauer__": 0.0
+         },
+         "__modell_simulation_ausgaben_pro_sekunde__": 0.05,
+         "__modell_simulation_viertel__": 4
+      },
+      "anfangszustand": {
+         "zusatzwerte": "ohne",
+         "zuweisung": {
+            "__modell_zuweisung_datei__": "zuweisungswerte.txt",
+            "__modell_zuweisung_koordinaten__": 3
+         },
+         "uebertragung": {
+            "__modell_uebertragung_datei__": "Ergebnisse_alt.odb",
+            "__modell_uebertragung_odbinstname__": "INSTBODEN",
+            "__modell_uebertragung_variablenliste__": ["SVAVG", "SDV"]
+         },
+         "anfangsloesung": {
+            "__modell_anfangsloesung_instanz__": "instBoden",
+            "__modell_anfangsloesung_set__": "setAll",
+            "__modell_anfangsloesung_werte__": [0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+         }
+      }
+   },
+   "ausgabeverarbeitung": {
+      "__odb_ordner__": "/pfad/zur/odb/",
+      "__odb_basisname__": "Pfahl",
+      "viewport": {
+         "viewport_verschoenern": false,
+         "__odb_viewport_groesse__": [800, 800],
+         "__odb_viewport_achse_rechts_oben__": [1, 2],
+         "__odb_viewport_drehung__": [15, 20, 0],
+         "__odb_viewport_zoom__": 1.0,
+         "__odb_viewport_verschiebung__": [0.0, 0.0],
+         "viewport_parallel": true
+      },
+      "ausgabe": {
+         "__odb_ausgabe_darstellung__": "CONTOURS_ON_DEF",
+         "elsetentfernen": false,
+         "__odb_ausgabe_elset_entfernen__": [],
+         "elsethinzufuegen": false,
+         "__odb_ausgabe_elset_hinzufuegen__": [],
+         "viewcut": false,
+         "__odb_ausgabe_viewcut__": []
+      },
+      "__odb_referenz_step_frame__": [-1, -1],
+      "ausgabeart": "bildausgabe",
+      "ausgabevariable": {
+         "__odb_ausgabevariable__": ["SVAVG", "SVAVG33", "INTEGRATION_POINT"],
+         "__odb_ausgabevariable_auto__": "OFF",
+         "__odb_ausgabevariable_minmax__": [-500.0, 0.0]
+      },
+      "bildausgabe": {
+         "__odb_bildname__": "pfahl_svavg33",
+         "__odb_multibild_anordnung__": [2, 2]
+      },
+      "plotausgabe": {
+         "__odb_plot_titel__": "Kraftverlauf",
+         "__odb_plot_xvar__": ["U", "U3"],
+         "__odb_plot_xvarposition__": ["INSTPFAHL.SETRP"],
+         "__odb_plot_xlabel__": "Weg in [m]",
+         "__odb_plot_xlimit__": [],
+         "__odb_plot_posxdir__": true,
+         "__odb_plot_yvar__": ["instPfahl", "RF3"],
+         "__odb_plot_yvarposition__": [],
+         "__odb_plot_ylabel__": "Kraft in [kN]",
+         "__odb_plot_ylimit__": [],
+         "__odb_plot_posydir__": true,
+         "__odb_plot_legendeneintraege__": []
+      },
+      "fieldausgabe": {
+         "__odb_fieldoutput_ausgabedatei__": "fieldoutput.txt",
+         "__odb_fieldoutput_position__": ["INSTBODEN", [9951]]
+      }
+   }
+}
