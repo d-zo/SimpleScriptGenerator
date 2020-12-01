@@ -34,7 +34,7 @@ Installation and running the program
 ------------------------------------
 
 SimpleScriptGenerator requires a working Python 3.x environment and
-can either be installed (e. g. with `pip`) or downloaded and run with Python.
+can be downloaded and run with Python.
 To run SimpleScriptGenerator directly,
 browse to the SimpleScriptGenerator folder and run `SimpleScriptGenerator.pyz`
 with the Python interpreter.
@@ -240,6 +240,6 @@ License
 
 SimpleScriptGenerator is released under the
 [GPL](https://www.gnu.org/licenses/gpl-3.0.html "GNU General Public License"),
-version 3 or greater (see als COPYRIGHT file).
+version 3 or greater (see also [LICENSE](https://github.com/d-zo/SimpleScriptGenerator/blob/master/LICENSE) file).
 It is provided without any warranty.
 
