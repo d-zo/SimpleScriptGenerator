@@ -24,11 +24,6 @@ A part of this document describes the usage of SimpleScriptGenerator with the ab
 template (see [abapys_front template](#abapys_front-template)).
 
 
-Project status
---------------
-
-The source files are to be uploaded until 2020-12-01.
-
 
 Installation and running the program
 ------------------------------------
@@ -113,6 +108,7 @@ it). If an issue is not caused by a template but by the program itself,
 make sure to include the console log for the bug report (see [Contributing](#contributing)).
 
 
+
 Structure and configuration
 ---------------------------
 
@@ -172,6 +168,7 @@ the background color of the entry is changed to orange and a warning is issued i
 The entry will not be saved unless the error is rectified.
 
 
+
 abapys_front template
 ---------------------
 
@@ -201,6 +198,7 @@ There are some additional comments in the script file (i.e. in the `codeblock.tx
 will be assembled into a script file) which might be helpful.
 Afterwards, the default settings in the project can be changed (not all at once),
 the project can be exported as another Python script and run in Abaqus/compared to the other script.
+
 
 
 Contributing
@@ -233,6 +231,7 @@ Afterwards, please submit a report in the
 
  - why this feature would be useful (use cases)
  - what could possible drawbacks be (e.g. compatibility, dependencies, ...)
+
 
 
 License
