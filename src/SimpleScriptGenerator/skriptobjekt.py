@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-skriptobjekt.py   v0.1 (2020-03)
+skriptobjekt.py   v0.2 (2020-12)
 """
 
 # Copyright 2020 Dominik Zobel.
@@ -288,10 +288,7 @@ class Skriptobjekt(object):
             # Sonderfaelle beruecksichtigen
             if (schluessel.endswith('[0]__')):
                formatstring = self.checks['Nachbereitung']['Formatstring'][schluessel][0];
-               # FIXME: Eigentlich soll nur das folgende gemacht werden, aber alle vorhandenen Strings
-               # sollen in Anfuehrungszeichen bleiben
-               #ersatz = ',\n '.join([formatstring.format(*zeile) for zeile in ersatz]);
-               #
+               # Gebe Eintraege zeilenweise aus aber mit Anfuehrungszeichen um vorhandene Strings
                segmente = formatstring.split('{');
                segmente = [x.split('}')[0] for x in segmente if len(x) > 0];
                einzelzeilen = [];

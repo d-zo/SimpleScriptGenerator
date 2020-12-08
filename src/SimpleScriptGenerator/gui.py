@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-gui.py   v0.5 (2020-11)
+gui.py   v0.6 (2020-12)
 """
 
 # Copyright 2020 Dominik Zobel.
@@ -36,10 +36,10 @@ def _Autoscrollfunktion(event):
 def _Radscrollfunktion(event, canvas, scrollbar):
    # Windows/Linux Scroll events
    delta = 0;
-   if ((event.num == 4) or (event.delta == -120)):
+   if ((event.num == 4) or (event.delta == 120)):
       delta = -1;
    #
-   if ((event.num == 5) or (event.delta == 120)):
+   if ((event.num == 5) or (event.delta == -120)):
       delta = 1;
    if (len(scrollbar.state()) == 0):
       # oder Zustand mit != 'disabled' pruefen

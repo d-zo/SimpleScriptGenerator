@@ -55,7 +55,7 @@ C:\path\to\Python\python.exe C:\path\to\SimpleScriptGenerator\SimpleScriptGenera
 pause
 ```
 
-If a template is used whose files are not located directly in a folder called `Vorlagen`,
+If a template is used which files are not located directly in a folder called `Vorlagen`,
 the path to the template has to be provided as an argument when running SimpleScriptGenerator.
 A template consists of three files `vorlagenlogik.json`, `einstellungen.json` and `codeblock.txt`,
 which have to be saved in the same folder
@@ -126,7 +126,7 @@ The configuration files of a template are structured in the following way:
    variables (with double underscore before and after variable name).
    In the section `Nachbereitung` additional variable names used in the script may be defined.
    When exporting to a script,
-   variables use either a default format unless a format is specified for their name here.
+   variables use a default format unless a format is specified for their name here.
  - `einstellungen.json` provides the default state and default internal variables for a new project
    as required by `vorlagenlogik.json`.
    The structure will be used to internally represent, load and save projects.
@@ -137,7 +137,7 @@ The configuration files of a template are structured in the following way:
    can't be loaded with the changed configuration file.
  - `codeblock.txt` contains all code snippets which will be used on exporting a project.
    The code snippets are saved in blocks with a certain structure and logical checks.
-   The checks are depending on the state variables and logical dependencies originally
+   The checks depend on the state variables and logical dependencies originally
    defined in `checks.json`.
    Whenever a project is exported,
    the current state variables are used to check which blocks are to be inserted in the output.
@@ -154,7 +154,7 @@ A new project can be loaded by `Datei->Öffnen`, the current project can be save
 `Datei->Speichern` and the current project can be exported to a code file
 (as defined in `vorlagenlogik.json`) by `Datei->Exportieren`.
 
-SimpleScriptGenerator automatically reads values as soon as the focus leaves the entry
+SimpleScriptGenerator automatically reads values as soon as the focus leaves the input field
 (no need to press the `Enter`-key).
 Before updating a value in the structure,
 the format is checked based on the default or previously accepted entry.
@@ -165,7 +165,7 @@ For floats, the dot is required and for (possibly nested) lists,
 the parentheses/brackets have to be in balance.
 If the test is not successfull,
 the background color of the entry is changed to orange and a warning is issued in the console.
-The entry will not be saved unless the error is rectified.
+The entry will not be saved unless the error is resolved.
 
 
 
@@ -180,12 +180,12 @@ commercial Finite-Element-Analysis software
 The intention of the abapys_front template is to interactively create complete Python scripts,
 which can be run in Abaqus.
 The scripts can create whole models or process the output of finished simulations.
-Since SimpleScriptGenerator is only creating the scripts,
+Since SimpleScriptGenerator only creates the scripts,
 Abaqus is not needed to work with the abapys_front template.
 
 It is recommended to have some basic Abaqus experience to understand,
 what the options do.
-Still, there are some issues with the current template, especially for new users:
+Still, there are some challenges with the current template, especially for new users:
 
  - some variables might not be understood without a better description in the GUI (image/sketch)
  - some entry field require nested lists of values, which are not obvious for new users
