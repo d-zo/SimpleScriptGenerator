@@ -8,12 +8,12 @@
  _.´  .| | || | |     . '.| \__. _.´  |  `-| | | |     .| | \ `.| | \__.| || | \__.| | .     || |.    | |
 |___.´ |_|_||_|_| |\_, \_,/\___,|___.´ ` __|_| |_| |\_, |_|  `.___|\___,|_||_|\___,|_|  \_,|_||_| \__,|_|   
                 | |                              | |   
-                |_|                              |_|                                          D. Zobel 2020
+                |_|                              |_|                                     D. Zobel 2020-2021
 
 Frontend zur interaktiven Erstellung von Skripten
 """
 
-# Copyright 2020 Dominik Zobel.
+# Copyright 2020-2021 Dominik Zobel.
 # All rights reserved.
 #
 # This file is part of the SimpleScriptGenerator package.

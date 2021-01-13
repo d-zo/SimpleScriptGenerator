@@ -3,7 +3,7 @@
 gui.py   v0.6 (2020-12)
 """
 
-# Copyright 2020 Dominik Zobel.
+# Copyright 2020-2021 Dominik Zobel.
 # All rights reserved.
 #
 # This file is part of the SimpleScriptGenerator package.
@@ -418,7 +418,7 @@ class GUIbasis(object):
          font=('Helvetica', '-18', 'bold'));
       infolabel1.grid(row=0, column=0, padx=30, pady=15);
       #
-      infolabel2 = CustomLabel(unterfenster, text='2020  D. Zobel');
+      infolabel2 = CustomLabel(unterfenster, text='2020-2021 Dominik Zobel');
       infolabel2.grid(row=1, column=0, padx=30, pady=5);
       #
       button = CustomButton(unterfenster, text="Schließen", command=unterfenster.destroy);
