@@ -24,7 +24,7 @@ from setuptools import setup
 
 setup(
    name='SimpleScriptGenerator',
-   version='0.3.0',
+   version='0.3.1',
    author='Dominik Zobel',
    author_email='dominik.zobel@tuhh.de',
    description='Graphical Frontend to interactively create scripts based on modifiable code templates',

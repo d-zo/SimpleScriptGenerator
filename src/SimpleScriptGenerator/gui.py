@@ -414,7 +414,7 @@ class GUIbasis(object):
       unterfenster.tk.call('wm', 'iconphoto', unterfenster._w, tkinter.PhotoImage(data=self.icondata));
       unterfenster.title('SimpleScriptGenerator Infos');
       #
-      infolabel1 = CustomLabel(unterfenster, text='SimpleScriptGenerator v0.3',
+      infolabel1 = CustomLabel(unterfenster, text='SimpleScriptGenerator v0.3.1',
          font=('Helvetica', '-18', 'bold'));
       infolabel1.grid(row=0, column=0, padx=30, pady=15);
       #

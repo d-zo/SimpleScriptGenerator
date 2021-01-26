@@ -1,5 +1,5 @@
 
-SimpleScriptGenerator 0.3.0
+SimpleScriptGenerator 0.3.1
 ===========================
 
 [SimpleScriptGenerator](https://github.com/d-zo/SimpleScriptGenerator)
