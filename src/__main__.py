@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-__main__.py   v0.2 (2020-03)
+__main__.py   v0.3 (2023-09)
 """
 
-# Copyright 2020-2021 Dominik Zobel.
+# Copyright 2020-2023 Dominik Zobel.
 # All rights reserved.
 #
 # This file is part of the SimpleScriptGenerator package.
@@ -28,25 +28,24 @@ __package__ = 'SimpleScriptGenerator';
 
 # -------------------------------------------------------------------------------------------------
 def main(argument):
-   """Hauptfunktion zum Starten von SimpleScriptGenerator.
-   """
-   import os
-   from .skriptobjekt import Skriptobjekt
-   from .gui import GUIbasis
-   #
-   print('Starte SimpleScriptGenerator');
-   #
-   if (len(argument) > 1):
-      print('# Abbruch: Aufruf ohne Argument oder mit Pfad als Argument erwartet');
-      return;
-   #
-   pfad = 'Vorlagen' + os.sep;
-   if (len(argument) == 1):
-      pfad = argument[0] + os.sep;
-   #
-   gui = GUIbasis();
-   gui.Ausfuehren(pfad=pfad);
-#
+    """Hauptfunktion zum Starten von SimpleScriptGenerator.
+    """
+    import os
+    from .skriptobjekt import Skriptobjekt
+    from .gui import GUIbasis
+
+    print('Starte SimpleScriptGenerator')
+
+    if (len(argument) > 1):
+        print('# Abbruch: Aufruf ohne Argument oder mit Pfad als Argument erwartet')
+        return
+
+    pfad = 'Vorlagen' + os.sep
+    if (len(argument) == 1):
+        pfad = argument[0] + os.sep
+
+    gui = GUIbasis()
+    gui.Ausfuehren(pfad=pfad)
 
 
 # -------------------------------------------------------------------------------------------------
@@ -54,10 +53,10 @@ import sys
 
 
 if (sys.version_info[0] < 3):
-   print('SimpleScriptGenerator benötigt mindestens Python3');
+    print('SimpleScriptGenerator benötigt mindestens Python3')
 else:
-   if (__name__ == '__main__'):
-      main(sys.argv[1:]);
-   else:
-      main(sys.argv[1:]);
-#
+    if (__name__ == '__main__'):
+        main(sys.argv[1:])
+    else:
+        main(sys.argv[1:])
+

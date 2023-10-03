@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-zuweisungsliste.py   v0.1 (2020-03)
+zuweisungsliste.py   v0.2 (2023-09)
 """
 
-# Copyright 2020-2021 Dominik Zobel.
+# Copyright 2020-2023 Dominik Zobel.
 # All rights reserved.
 #
 # This file is part of the SimpleScriptGenerator package.
@@ -24,57 +24,58 @@ zuweisungsliste.py   v0.1 (2020-03)
 
 # -------------------------------------------------------------------------------------------------
 class Zuweisungsliste(object):
-   def __init__(self):
-      self.elementliste = [];
-      self.elementindizes = [];
-   #
-   def Hinzufuegen(self, element, index):
-      """Fuegt ein neues element zu den intern gespeicherten Elementen hinzu und verknuepft es mit
-      dem uebergebenen index.
-      """
-      self.elementliste += [element];
-      self.elementindizes +=[index];
-   #
-   def Leeren(self):
-      self.elementliste = [];
-      self.elementindizes = [];
-   #
-   def HatElement(self, element):
-      if (element in self.elementliste):
-         return True;
-      else:
-         return False;
-   #
-   def Laenge(self):
-      return len(self.elementliste);
-   #
-   def Ausgeben(self, index):
-      return [self.elementliste[index], self.elementindizes[index]];
-   #
-   def AllesBisElementEntfernen(self, element):
-      """Entfernt alle intern gespeicherten Elemente bis einschliesslich element. Gibt den zu
-      element gespeicherten Index zurueck. Falls element nicht intern gespeichert ist, passiert
-      nichts und None wird zurueckgegeben.
-      """
-      index = None;
-      if (element in self.elementliste):
-         elemidx = self.elementliste.index(element);
-         index = self.elementindizes[elemidx];
-         #
-         self.elementliste = self.elementliste[:elemidx];
-         self.elementindizes = self.elementindizes[:elemidx];
-         
-      #
-      return index;
-   #
-   def LetztesElementEntfernen(self):
-      del self.elementliste[-1];
-      del self.elementindizes[-1];
-   #
-   def UebersichtAusgeben(self):
-      ausgabeliste = [];
-      for elem, idx in zip(self.elementliste, self.elementindizes):
-         ausgabeliste += [str(elem) + ': ' + str(idx)];
-      #
-      print(', '.join(ausgabeliste));
-#
+    def __init__(self):
+        self.elementliste = []
+        self.elementindizes = []
+
+    def Hinzufuegen(self, element, index):
+        """Fuegt ein neues element zu den intern gespeicherten Elementen hinzu und verknuepft es mit
+        dem uebergebenen index.
+        """
+        self.elementliste += [element]
+        self.elementindizes +=[index]
+
+    def Leeren(self):
+        self.elementliste = []
+        self.elementindizes = []
+
+    def HatElement(self, element):
+        if (element in self.elementliste):
+            return True
+        else:
+            return False
+
+    def Laenge(self):
+        return len(self.elementliste)
+
+    def Ausgeben(self, index):
+        return [self.elementliste[index], self.elementindizes[index]]
+
+    def AllesBisElementEntfernen(self, element):
+        """Entfernt alle intern gespeicherten Elemente bis einschliesslich element. Gibt den zu
+        element gespeicherten Index zurueck. Falls element nicht intern gespeichert ist, passiert
+        nichts und None wird zurueckgegeben.
+        """
+        index = None
+        if (element in self.elementliste):
+            elemidx = self.elementliste.index(element)
+            index = self.elementindizes[elemidx]
+
+            self.elementliste = self.elementliste[:elemidx]
+            self.elementindizes = self.elementindizes[:elemidx]
+
+
+        return index
+
+    def LetztesElementEntfernen(self):
+        del self.elementliste[-1]
+        del self.elementindizes[-1]
+
+    def UebersichtAusgeben(self):
+        ausgabeliste = []
+        for elem, idx in zip(self.elementliste, self.elementindizes):
+            ausgabeliste += [str(elem) + ': ' + str(idx)]
+
+        print(', '.join(ausgabeliste))
+
+
