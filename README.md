@@ -23,6 +23,8 @@ to generate scripts based on functions of the
 A part of this document describes the usage of SimpleScriptGenerator with the abapys_front
 template (see [abapys_front template](#abapys_front-template)).
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4467985.svg)](https://doi.org/10.5281/zenodo.4467985)
+
 
 
 Installation and running the program
